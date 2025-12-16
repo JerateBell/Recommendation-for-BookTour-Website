@@ -1,75 +1,8 @@
 # KẾT QUẢ THỰC NGHIỆM HỆ THỐNG ĐỀ XUẤT
 
-## PHẦN 1: KẾT QUẢ CHẠY BỘ MACHINE LEARNING
 
-### 1.1. Hybrid Collaborative Filtering (cf-new.py)
 
-**Mô tả**: Thuật toán kết hợp User-User Collaborative Filtering và Item-Item Collaborative Filtering với trọng số alpha.
-
-**Dataset**:
-- Số lượng users: 100
-- Số lượng activities: 468
-- Tổng số ratings: 2,375
-- Chia train/test: 80/20 (Train: 1,900, Test: 475)
-
-**Kết quả thử nghiệm với các giá trị alpha**:
-
-| Alpha | RMSE |
-|-------|------|
-| 0.0   | 0.7257 |
-| 0.1   | 0.7086 |
-| 0.2   | 0.6972 |
-| 0.3   | 0.6911 |
-| **0.4** | **0.6906** ⭐ |
-| 0.5   | 0.6957 |
-| 0.6   | 0.7063 |
-| 0.7   | 0.7217 |
-| 0.8   | 0.7408 |
-| 0.9   | 0.7620 |
-| 1.0   | 0.7850 |
-
-**🏆 Kết quả tối ưu**:
-- **Alpha tối ưu**: 0.4
-- **RMSE thấp nhất**: 0.6906
-- **Model đã lưu**: `../models/hybrid_cf_model.pkl`
-
-**Đánh giá**: RMSE = 0.6906 cho thấy thuật toán có độ chính xác tốt trong việc dự đoán rating. Giá trị này nằm trong khoảng chấp nhận được cho hệ thống đề xuất (RMSE < 1.0 được coi là tốt).
-
----
-
-### 1.2. Content-Based Filtering (content-based-new.py)
-
-**Mô tả**: Thuật toán dựa trên đặc trưng của items (category, destination, price, duration, description) sử dụng ElasticNet/Ridge regression.
-
-**Features sử dụng**:
-- Categorical: Category, Destination (One-Hot Encoding)
-- Numerical: Price, Duration (MinMax Scaling)
-- Text: Description (TF-IDF Vectorization, max_features=300)
-- Tổng số features: 135
-
-**Kết quả đánh giá**:
-
-| Metric | Train | Test |
-|--------|-------|------|
-| **RMSE** | 0.5576 | 0.6719 |
-| **Accuracy (±1)** | 92.74% | 90.89% |
-| **Precision@10** | - | 0.0070 |
-| **Recall@10** | - | 0.0124 |
-| **NDCG@10** | - | 0.0116 |
-
-**Model đã lưu**: `../models/content_based_model.pkl`
-- Số lượng user models: 100
-- Số lượng items: 502
-- Item features shape: (502, 135)
-
-**Đánh giá**: 
-- RMSE test = 0.6719 cho thấy độ chính xác tốt
-- Accuracy 90.89% cho thấy 90.89% các dự đoán có sai số ≤ 1 điểm rating
-- Các metric Precision@10, Recall@10, NDCG@10 cho thấy thuật toán có khả năng đề xuất items phù hợp
-
----
-
-### 1.3. Collaborative Filtering với MovieLens 100K (cf.py)
+### 1.1. Collaborative Filtering với MovieLens 100K (cf.py)
 
 **Mô tả**: Thuật toán Hybrid CF được kiểm chứng trên **MovieLens 100K** - một benchmark dataset chuẩn và nổi tiếng trong lĩnh vực Recommendation Systems. Việc thử nghiệm trên dataset này nhằm chứng minh thuật toán khả thi và hoạt động tốt trên dữ liệu chuẩn trước khi áp dụng vào dữ liệu thực tế của dự án.
 
@@ -146,10 +79,96 @@
 
 ---
 
+
 ## PHẦN 2: ÁP DỤNG CHO DỰ ÁN
 
+### 2.1. Content-Based Filtering (content-based-new.py)
 
-#### 2.2.2. Các file Python đã triển khai
+**Mô tả**: Thuật toán dựa trên đặc trưng của items (category, destination, price, duration, description) sử dụng ElasticNet/Ridge regression.
+
+**Features sử dụng**:
+- Categorical: Category, Destination (One-Hot Encoding)
+- Numerical: Price, Duration (MinMax Scaling)
+- Text: Description (TF-IDF Vectorization, max_features=300)
+- Tổng số features: 135
+
+**Kết quả đánh giá**:
+
+| Metric | Train | Test |
+|--------|-------|------|
+| **RMSE** | 0.5576 | 0.6719 |
+| **Accuracy (±1)** | 92.74% | 90.89% |
+| **Precision@10** | - | 0.0070 |
+| **Recall@10** | - | 0.0124 |
+| **NDCG@10** | - | 0.0116 |
+
+**Model đã lưu**: `../models/content_based_model.pkl`
+- Số lượng user models: 100
+- Số lượng items: 502
+- Item features shape: (502, 135)
+
+**Đánh giá**: 
+- RMSE test = 0.6719 cho thấy độ chính xác tốt
+- Accuracy 90.89% cho thấy 90.89% các dự đoán có sai số ≤ 1 điểm rating
+- Các metric Precision@10, Recall@10, NDCG@10 cho thấy thuật toán có khả năng đề xuất items phù hợp
+
+---
+
+### 2.2. Hybrid Collaborative Filtering (cf-new.py)
+
+**Mô tả**: Thuật toán kết hợp User-User Collaborative Filtering và Item-Item Collaborative Filtering với trọng số alpha. Đây là thuật toán được áp dụng trực tiếp vào **dữ liệu thực tế** của dự án sau khi đã được kiểm chứng trên benchmark dataset MovieLens 100K.
+
+**Dataset (Dữ liệu thực tế của dự án)**:
+- **Nguồn**: Dữ liệu ratings từ hệ thống đề xuất hoạt động du lịch
+- **Số lượng users**: 100
+- **Số lượng activities**: 468
+- **Tổng số ratings**: 2,375
+- **Chia train/test**: 80/20 (Train: 1,900, Test: 475)
+- **Format**: `user_id, activity_id, rating`
+
+**Thuật toán**:
+- **User-User CF**: Tìm users tương tự dựa trên lịch sử đánh giá, sử dụng Cosine Similarity
+- **Item-Item CF**: Tìm items tương tự dựa trên ratings của users, sử dụng Cosine Similarity
+- **Hybrid**: Kết hợp cả hai với công thức: `predicted_rating = alpha * UserUser_rating + (1-alpha) * ItemItem_rating`
+- **K nearest neighbors**: k = 30
+- **Normalization**: Mean centering (trừ đi rating trung bình của user)
+
+**Kết quả thử nghiệm với các giá trị alpha**:
+
+| Alpha | RMSE |
+|-------|------|
+| 0.0   | 0.7257 |
+| 0.1   | 0.7086 |
+| 0.2   | 0.6972 |
+| 0.3   | 0.6911 |
+| **0.4** | **0.6906** ⭐ |
+| 0.5   | 0.6957 |
+| 0.6   | 0.7063 |
+| 0.7   | 0.7217 |
+| 0.8   | 0.7408 |
+| 0.9   | 0.7620 |
+| 1.0   | 0.7850 |
+
+**🏆 Kết quả tối ưu**:
+- **Alpha tối ưu**: 0.4
+- **RMSE thấp nhất**: 0.6906
+- **Model đã lưu**: `../models/hybrid_cf_model.pkl`
+
+**Đánh giá**: 
+- RMSE = 0.6906 cho thấy thuật toán có độ chính xác tốt trong việc dự đoán rating trên dữ liệu thực tế
+- Kết quả này **tốt hơn** so với khi chạy trên MovieLens 100K (0.9703), chứng minh thuật toán phù hợp với dữ liệu của dự án
+- Alpha tối ưu = 0.4 cho thấy cần kết hợp cả User-User và Item-Item CF (không nghiêng về một phía)
+- Giá trị RMSE < 0.7 được coi là rất tốt cho hệ thống đề xuất
+- Model đã được lưu kèm user mapping và activity mapping để sử dụng trong production
+
+**So sánh với MovieLens 100K**:
+- Trên MovieLens 100K: RMSE = 0.9703, alpha tối ưu = 0.9 (nghiêng về Item-Item CF)
+- Trên dữ liệu thực tế: RMSE = 0.6906, alpha tối ưu = 0.4 (cân bằng hơn)
+- Điều này cho thấy đặc điểm dữ liệu khác nhau ảnh hưởng đến trọng số tối ưu
+
+---
+
+#### 2.3. Các file Python đã triển khai
 
 1. **`cf-new.py`** - Hybrid Collaborative Filtering
    - Input: `ratings.csv` (user_id, activity_id, rating)
